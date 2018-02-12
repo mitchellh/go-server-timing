@@ -1,4 +1,4 @@
-# Server-Timing Header for Go
+# HTTP Server-Timing for Go [![Godoc](https://godoc.org/github.com/mitchellh/go-server-timing?status.svg)](https://godoc.org/github.com/mitchellh/go-server-timing)
 
 This library a middleware for using the
 [HTTP Server-Timing](https://www.w3.org/TR/server-timing) header. This header
