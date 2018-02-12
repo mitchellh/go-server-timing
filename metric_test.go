@@ -19,7 +19,7 @@ func TestMetric_startStop(t *testing.T) {
 		t.Fatal("expected duration to be within 100ms")
 	}
 	if actual < 30*time.Millisecond {
-		t.Fatal("expected duration to be more than 100ms")
+		t.Fatal("expected duration to be more than 30ms")
 	}
 }
 
