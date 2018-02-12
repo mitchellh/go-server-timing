@@ -78,3 +78,20 @@ func TestHeaderString(t *testing.T) {
 		})
 	}
 }
+
+// Same as TestHeaderString but using the Add method
+func TestHeaderAdd(t *testing.T) {
+	for _, tt := range headerCases {
+		t.Run(tt.HeaderValue, func(t *testing.T) {
+			var h Header
+			for _, m := range tt.Metrics {
+				h.Add(m)
+			}
+
+			actual := h.String()
+			if actual != tt.HeaderValue {
+				t.Fatalf("received, expected:\n\n%q\n\n%q", actual, tt.HeaderValue)
+			}
+		})
+	}
+}

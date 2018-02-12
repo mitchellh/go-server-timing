@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/golang/gddo/httputil/header"
@@ -14,11 +15,20 @@ import (
 // HeaderKey is the specified key for the Server-Timing header.
 const HeaderKey = "Server-Timing"
 
-// Header is a parsed Server-Timing header value. This can be re-encoded
-// and sent as a valid HTTP header value using String().
+// Header represents a collection of metrics that can be encoded as
+// a Server-Timing header value.
+//
+// The functions for working with metrics are concurrency-safe to make
+// it easy to record metrics from goroutines. If you want to avoid the
+// lock overhead, you can access the Metrics field directly.
 type Header struct {
 	// Metrics is the list of metrics in the header.
 	Metrics []*Metric
+
+	// The lock that is held when Metrics is being modified. This
+	// ONLY NEEDS TO BE SET WHEN working with Metrics directly. If using
+	// the functions on the struct, the lock is managed automatically.
+	sync.Mutex
 }
 
 // ParseHeader parses a Server-Timing header value.
@@ -55,6 +65,15 @@ func ParseHeader(input string) (*Header, error) {
 	}
 
 	return &Header{Metrics: metrics}, nil
+}
+
+// Add adds the given metric to the header.
+//
+// This function is safe to call concurrently.
+func (h *Header) Add(m *Metric) {
+	h.Lock()
+	defer h.Unlock()
+	h.Metrics = append(h.Metrics, m)
 }
 
 // String returns the valid Server-Timing header value that can be

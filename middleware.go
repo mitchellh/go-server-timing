@@ -51,6 +51,11 @@ func Middleware(next http.Handler) http.Handler {
 }
 
 func writeHeader(headers http.Header, h *Header) {
+	// Grab the lock just in case there is any ongoing concurrency that
+	// still has a reference and may be modifying the value.
+	h.Lock()
+	defer h.Unlock()
+
 	// If there are no metrics set, do nothing
 	if len(h.Metrics) == 0 {
 		return
