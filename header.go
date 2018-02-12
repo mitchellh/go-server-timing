@@ -11,6 +11,9 @@ import (
 	"github.com/golang/gddo/httputil/header"
 )
 
+// HeaderKey is the specified key for the Server-Timing header.
+const HeaderKey = "Server-Timing"
+
 // Header is a parsed Server-Timing header value. This can be re-encoded
 // and sent as a valid HTTP header value using String().
 type Header struct {

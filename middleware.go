@@ -1,0 +1,60 @@
+package servertiming
+
+import (
+	"net/http"
+
+	"github.com/felixge/httpsnoop"
+)
+
+// Middleware wraps an http.Handler and provides a *Header in the request
+// context that can be used to set Server-Timing headers. The *Header can be
+// extracted from the context using FromContext.
+//
+// The Server-Timing header will be written when the status is written
+// only if there are non-empty number of metrics.
+//
+// To control when Server-Timing is sent, the easiest approach is to wrap
+// this middleware and only call it if the request should send server timings.
+// For examples, see the README.
+func Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Create the Server-Timing headers struct
+		var h Header
+
+		// This places the *Header value into the request context. This
+		// can be extracted again with FromContext.
+		r = r.WithContext(NewContext(r.Context(), &h))
+
+		// Get the header map. This is a reference and shouldn't change.
+		headers := w.Header()
+
+		// Hook the response writer we pass upstream so we can modify headers
+		// before they write them to the wire, but after we know what status
+		// they are writing.
+		hooks := httpsnoop.Hooks{
+			WriteHeader: func(original httpsnoop.WriteHeaderFunc) httpsnoop.WriteHeaderFunc {
+				// Return a function with same signature as
+				// http.ResponseWriter.WriteHeader to be called in it's place
+				return func(code int) {
+					// Write the headers
+					writeHeader(headers, &h)
+
+					// Call the original WriteHeader function
+					original(code)
+				}
+			},
+		}
+
+		w = httpsnoop.Wrap(w, hooks)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func writeHeader(headers http.Header, h *Header) {
+	// If there are no metrics set, do nothing
+	if len(h.Metrics) == 0 {
+		return
+	}
+
+	headers.Set(HeaderKey, h.String())
+}
