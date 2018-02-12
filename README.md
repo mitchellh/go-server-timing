@@ -6,7 +6,7 @@ allows a server to send timing information from the backend, such as database
 access time, file reads, etc. The timing information can be then be inspected
 in the standard browser developer tools:
 
-![Server Timing Example](https://raw.githubusercontent.com/mitchellh/go-server-timing/master/example/screenshot.png?token=AAAFE1vPUMfv0CZIbOHriUDaQdd8PO91ks5aimw9wA%3D%3D)
+![Server Timing Example](https://raw.githubusercontent.com/mitchellh/go-server-timing/master/example/screenshot.png)
 
 ## Features
 
