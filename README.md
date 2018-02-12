@@ -18,6 +18,10 @@ in the standard browser debug tools:
 
   * Parse `Server-Timing` headers as a client.
 
+  * Note: No browser properly supports sending the Server-Timing header as
+    an [HTTP Trailer](https://tools.ietf.org/html/rfc7230#section-4.4) so
+	the Middleware only supports a normal header currently.
+
 ## Browser Support
 
 Browser support is required to **view** server timings easily. Because server
