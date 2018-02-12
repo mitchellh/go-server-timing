@@ -66,3 +66,15 @@ func TestParseHeader(t *testing.T) {
 		})
 	}
 }
+
+func TestHeaderString(t *testing.T) {
+	for _, tt := range headerCases {
+		t.Run(tt.HeaderValue, func(t *testing.T) {
+			h := &Header{Metrics: tt.Metrics}
+			actual := h.String()
+			if actual != tt.HeaderValue {
+				t.Fatalf("received, expected:\n\n%q\n\n%q", actual, tt.HeaderValue)
+			}
+		})
+	}
+}

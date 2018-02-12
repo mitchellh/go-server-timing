@@ -3,7 +3,9 @@ package servertiming
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang/gddo/httputil/header"
@@ -14,37 +16,6 @@ import (
 type Header struct {
 	// Metrics is the list of metrics in the header.
 	Metrics []*Metric
-}
-
-// Metric represents a single metric for the Server-Timing header.
-type Metric struct {
-	// Name is the name of the metric. This must be a valid RFC7230 "token"
-	// format. In a gist, this is an alphanumeric string that may contain
-	// most common symbols but may not contain any whitespace. The exact
-	// syntax can be found in RFC7230.
-	//
-	// It is common for Name to be a unique identifier (such as "sql-1") and
-	// for a more human-friendly name to be used in the "desc" field.
-	Name string
-
-	// Duration is the duration of this Metric.
-	Duration time.Duration
-
-	// Desc is any string describing this metric. For example: "SQL Primary".
-	// The specific format of this is `token | quoted-string` according to
-	// RFC7230.
-	Desc string
-
-	// Extra is a set of extra parameters and values to send with the
-	// metric. The specification states that unrecognized parameters are
-	// to be ignored so it should be safe to add additional data here. The
-	// key must be a valid "token" (same syntax as Name) and the value can
-	// be any "token | quoted-string" (same as Desc field).
-	//
-	// If this map contains a key that would be sent by another field in this
-	// struct (such as "desc"), then this value is prioritized over the
-	// struct value.
-	Extra map[string]string
 }
 
 // ParseHeader parses a Server-Timing header value.
@@ -86,16 +57,12 @@ func ParseHeader(input string) (*Header, error) {
 // String returns the valid Server-Timing header value that can be
 // sent in an HTTP response.
 func (h *Header) String() string {
-	return ""
-}
-
-// fmt.GoStringer so %v works on pointer value.
-func (m *Metric) GoString() string {
-	if m == nil {
-		return "nil"
+	parts := make([]string, 0, len(h.Metrics))
+	for _, m := range h.Metrics {
+		parts = append(parts, m.String())
 	}
 
-	return fmt.Sprintf("*%#v", *m)
+	return strings.Join(parts, ",")
 }
 
 // Specified server-timing-param-name values.
@@ -112,4 +79,18 @@ func headerParams(s string) (http.Header, string) {
 	return http.Header(map[string][]string{
 		key: []string{s},
 	}), key
+}
+
+var reNumber = regexp.MustCompile(`\d+`)
+
+// headerEncodeParam encodes a key/value pair as a proper `key=value`
+// syntax, using double-quotes if necessary.
+func headerEncodeParam(key, value string) string {
+	// The only case we currently don't quote is numbers. We can make this
+	// smarter in the future.
+	if reNumber.MatchString(value) {
+		return fmt.Sprintf(`%s=%s`, key, value)
+	}
+
+	return fmt.Sprintf(`%s=%q`, key, value)
 }
