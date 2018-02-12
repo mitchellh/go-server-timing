@@ -56,7 +56,7 @@ func TestMiddleware(t *testing.T) {
 			})
 
 			// Perform the request
-			Middleware(handler).ServeHTTP(rec, r)
+			Middleware(handler, nil).ServeHTTP(rec, r)
 
 			// Test that it is present or not
 			_, present := map[string][]string(rec.Header())[HeaderKey]

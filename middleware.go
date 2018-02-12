@@ -6,9 +6,16 @@ import (
 	"github.com/felixge/httpsnoop"
 )
 
+// MiddlewareOpts are options for the Middleware.
+type MiddlewareOpts struct {
+	// Nothing currently, reserved for the future.
+}
+
 // Middleware wraps an http.Handler and provides a *Header in the request
 // context that can be used to set Server-Timing headers. The *Header can be
 // extracted from the context using FromContext.
+//
+// The options supplied to this can be nil to use defaults.
 //
 // The Server-Timing header will be written when the status is written
 // only if there are non-empty number of metrics.
@@ -16,7 +23,7 @@ import (
 // To control when Server-Timing is sent, the easiest approach is to wrap
 // this middleware and only call it if the request should send server timings.
 // For examples, see the README.
-func Middleware(next http.Handler) http.Handler {
+func Middleware(next http.Handler, opts *MiddlewareOpts) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Create the Server-Timing headers struct
 		var h Header

@@ -21,7 +21,7 @@ func main() {
 	var h http.Handler = http.HandlerFunc(handler)
 
 	// Wrap our handler with the server timing middleware
-	h = servertiming.Middleware(h)
+	h = servertiming.Middleware(h, nil)
 
 	// Let the user know what to do for this example
 	println("Visit http://127.0.0.1:8080")

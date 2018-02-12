@@ -44,7 +44,7 @@ func main() {
 	var h http.Handler = http.HandlerFunc(handler)
 
 	// Wrap our handler with the server timing middleware
-	h = servertiming.Middleware(h)
+	h = servertiming.Middleware(h, nil)
 
 	// Start!
 	http.ListenAndServe(":8080", h)
