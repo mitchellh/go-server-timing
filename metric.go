@@ -8,6 +8,23 @@ import (
 )
 
 // Metric represents a single metric for the Server-Timing header.
+//
+// The easiest way to use the Metric is to use NewMetric and chain it. This
+// results in a single line defer at the top of a function time a function.
+//
+//   timing := FromContext(r.Context())
+//   defer timing.NewMetric("sql").Start().Stop()
+//
+// For timing around specific blocks of code:
+//
+//   m := timing.NewMetric("sql").Start()
+//   // ... run your code being timed here
+//   m.Stop()
+//
+// A metric is expected to represent a single timing event. Therefore,
+// no functions on the struct are safe for concurrency by default. If a single
+// Metric is shared by multiple concurrenty goroutines, you must lock access
+// manually.
 type Metric struct {
 	// Name is the name of the metric. This must be a valid RFC7230 "token"
 	// format. In a gist, this is an alphanumeric string that may contain
@@ -36,6 +53,38 @@ type Metric struct {
 	// struct (such as "desc"), then this value is prioritized over the
 	// struct value.
 	Extra map[string]string
+
+	// startTime is the time that this metric recording was started if
+	// Start() was called.
+	startTime time.Time
+}
+
+// WithDesc is a chaining-friendly helper to set the Desc field on the Metric.
+func (m *Metric) WithDesc(desc string) *Metric {
+	m.Desc = desc
+	return m
+}
+
+// Start starts a timer for recording the duration of some task. This must
+// be paired with a Stop call to set the duration. Calling this again will
+// reset the start time for a subsequent Stop call.
+func (m *Metric) Start() *Metric {
+	m.startTime = time.Now()
+	return m
+}
+
+// Stop ends the timer started with Start and records the duration in the
+// Duration field. Calling this multiple times will modify the Duration based
+// on the last time Start was called.
+//
+// If Start was never called, this function has zero effect.
+func (m *Metric) Stop() *Metric {
+	// Only record if we have a start time set with Start()
+	if !m.startTime.IsZero() {
+		m.Duration = time.Now().Sub(m.startTime)
+	}
+
+	return m
 }
 
 // String returns the valid Server-Timing metric entry value.

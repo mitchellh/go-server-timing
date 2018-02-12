@@ -67,13 +67,19 @@ func ParseHeader(input string) (*Header, error) {
 	return &Header{Metrics: metrics}, nil
 }
 
+// NewMetric creates a new Metric and adds it to this header.
+func (h *Header) NewMetric(name string) *Metric {
+	return h.Add(&Metric{Name: name})
+}
+
 // Add adds the given metric to the header.
 //
 // This function is safe to call concurrently.
-func (h *Header) Add(m *Metric) {
+func (h *Header) Add(m *Metric) *Metric {
 	h.Lock()
 	defer h.Unlock()
 	h.Metrics = append(h.Metrics, m)
+	return m
 }
 
 // String returns the valid Server-Timing header value that can be
