@@ -1,6 +1,6 @@
 # HTTP Server-Timing for Go [![Godoc](https://godoc.org/github.com/mitchellh/go-server-timing?status.svg)](https://godoc.org/github.com/mitchellh/go-server-timing)
 
-This library a middleware for using
+This is a library including middleware for using
 [HTTP Server-Timing](https://www.w3.org/TR/server-timing) with Go. This header
 allows a server to send timing information from the backend, such as database
 access time, file reads, etc. The timing information can be then be inspected
