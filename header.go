@@ -21,6 +21,11 @@ const HeaderKey = "Server-Timing"
 // The functions for working with metrics are concurrency-safe to make
 // it easy to record metrics from goroutines. If you want to avoid the
 // lock overhead, you can access the Metrics field directly.
+//
+// The functions for working with metrics are also usable on a nil
+// Header pointer. This allows functions that use FromContext to get the
+// *Header value to skip nil-checking and use it as normal. On a nil
+// *Header, Metrics are not recorded.
 type Header struct {
 	// Metrics is the list of metrics in the header.
 	Metrics []*Metric
@@ -76,6 +81,10 @@ func (h *Header) NewMetric(name string) *Metric {
 //
 // This function is safe to call concurrently.
 func (h *Header) Add(m *Metric) *Metric {
+	if h == nil {
+		return m
+	}
+
 	h.Lock()
 	defer h.Unlock()
 	h.Metrics = append(h.Metrics, m)
