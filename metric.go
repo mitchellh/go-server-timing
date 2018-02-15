@@ -87,6 +87,17 @@ func (m *Metric) Stop() *Metric {
 	return m
 }
 
+// StopUnlessStopped calls Stop only if Stop has not already been called.
+// This can be useful if you need to make sure Stop is called and don't
+// want to replace an exiting Duration value. You might want this in a
+// defer function where you don't want to add Stop on each exceptional exit.
+func (m *Metric) StopUnlessStopped() *Metric {
+	if m.Duration == 0 {
+		m.Stop()
+	}
+	return m
+}
+
 // String returns the valid Server-Timing metric entry value.
 func (m *Metric) String() string {
 	// Begin building parts, expected capacity is length of extra
