@@ -81,7 +81,7 @@ func (m *Metric) Start() *Metric {
 func (m *Metric) Stop() *Metric {
 	// Only record if we have a start time set with Start()
 	if !m.startTime.IsZero() {
-		m.Duration = time.Now().Sub(m.startTime)
+		m.Duration = time.Since(m.startTime)
 	}
 
 	return m
@@ -113,7 +113,7 @@ func (m *Metric) String() string {
 	return strings.Join(parts, ";")
 }
 
-// fmt.GoStringer so %v works on pointer value.
+// GoString is needed for fmt.GoStringer so %v works on pointer value.
 func (m *Metric) GoString() string {
 	if m == nil {
 		return "nil"
