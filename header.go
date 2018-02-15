@@ -114,7 +114,7 @@ const (
 func headerParams(s string) (http.Header, string) {
 	const key = "Key"
 	return http.Header(map[string][]string{
-		key: []string{s},
+		key: {s},
 	}), key
 }
 

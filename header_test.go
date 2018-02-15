@@ -15,7 +15,7 @@ var headerCases = []struct {
 }{
 	{
 		[]*Metric{
-			&Metric{
+			{
 				Name:     "sql-1",
 				Duration: 100 * time.Millisecond,
 				Desc:     "MySQL lookup Server",
@@ -28,7 +28,7 @@ var headerCases = []struct {
 	// Comma in description
 	{
 		[]*Metric{
-			&Metric{
+			{
 				Name:     "sql-1",
 				Duration: 100 * time.Millisecond,
 				Desc:     "MySQL, lookup Server",
@@ -41,7 +41,7 @@ var headerCases = []struct {
 	// Semicolon in description
 	{
 		[]*Metric{
-			&Metric{
+			{
 				Name:     "sql-1",
 				Duration: 100 * time.Millisecond,
 				Desc:     "MySQL; lookup Server",

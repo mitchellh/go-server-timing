@@ -1,4 +1,8 @@
-# HTTP Server-Timing for Go [![Godoc](https://godoc.org/github.com/mitchellh/go-server-timing?status.svg)](https://godoc.org/github.com/mitchellh/go-server-timing)
+# HTTP Server-Timing for Go
+[![Godoc](https://godoc.org/github.com/mitchellh/go-server-timing?status.svg)](https://godoc.org/github.com/mitchellh/go-server-timing)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mitchellh/go-server-timing)](https://goreportcard.com/report/github.com/mitchellh/go-server-timing)
+[![GolangCI](https://golangci.com/badges/github.com/mitchellh/go-server-timing.svg)](https://golangci.com)
+
 
 This is a library including middleware for using
 [HTTP Server-Timing](https://www.w3.org/TR/server-timing) with Go. This header

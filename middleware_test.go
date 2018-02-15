@@ -28,7 +28,7 @@ func TestMiddleware(t *testing.T) {
 		{
 			Name: "single metric",
 			Metrics: []*Metric{
-				&Metric{
+				{
 					Name:     "sql-1",
 					Duration: 100 * time.Millisecond,
 					Desc:     "MySQL; lookup Server",

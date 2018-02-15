@@ -23,7 +23,7 @@ type MiddlewareOpts struct {
 // To control when Server-Timing is sent, the easiest approach is to wrap
 // this middleware and only call it if the request should send server timings.
 // For examples, see the README.
-func Middleware(next http.Handler, opts *MiddlewareOpts) http.Handler {
+func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Create the Server-Timing headers struct
 		var h Header

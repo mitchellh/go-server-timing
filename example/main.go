@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -27,7 +28,7 @@ func main() {
 	println("Visit http://127.0.0.1:8080")
 
 	// Start!
-	http.ListenAndServe(":8080", h)
+	log.Fatal(http.ListenAndServe(":8080", h))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +63,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// You could continue recording more metrics, but let's just return now
 	w.WriteHeader(200)
-	w.Write([]byte("Done. Check your browser inspector timing details."))
+	_, err := w.Write([]byte("Done. Check your browser inspector timing details."))
+	if err != nil {
+		log.Printf("Can't write http response: %s", err)
+	}
 }
 
 func random(min, max int) time.Duration {
