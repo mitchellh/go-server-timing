@@ -7,11 +7,18 @@ import (
 	"time"
 )
 
+const (
+	responseBody   = "response"
+	responseStatus = http.StatusCreated
+)
+
 func TestMiddleware(t *testing.T) {
+
 	cases := []struct {
-		Name     string
-		Metrics  []*Metric
-		Expected bool
+		Name             string
+		Metrics          []*Metric
+		SkipWriteHeaders bool
+		Expected         bool
 	}{
 		{
 			Name:     "nil metrics",
@@ -36,6 +43,19 @@ func TestMiddleware(t *testing.T) {
 			},
 			Expected: true,
 		},
+
+		{
+			Name: "single metric without invoking WriteHeaders in handler",
+			Metrics: []*Metric{
+				{
+					Name:     "sql-1",
+					Duration: 100 * time.Millisecond,
+					Desc:     "MySQL; lookup Server",
+				},
+			},
+			Expected:         true,
+			SkipWriteHeaders: true,
+		},
 	}
 
 	for _, tt := range cases {
@@ -52,7 +72,12 @@ func TestMiddleware(t *testing.T) {
 				h.Metrics = tt.Metrics
 
 				// Write the header to flush the response
-				w.WriteHeader(204)
+				if !tt.SkipWriteHeaders {
+					w.WriteHeader(responseStatus)
+				}
+
+				// Write date to response body
+				w.Write([]byte(responseBody))
 			})
 
 			// Perform the request
@@ -64,11 +89,26 @@ func TestMiddleware(t *testing.T) {
 				t.Fatalf("expected header to be present: %v, but wasn't", tt.Expected)
 			}
 
-			// Test the response
+			// Test the response headers
 			expected := (&Header{Metrics: tt.Metrics}).String()
 			actual := rec.Header().Get(HeaderKey)
 			if actual != expected {
 				t.Fatalf("got wrong value, expected != actual: %q != %q", expected, actual)
+			}
+
+			// Test the status code of the response, if we skip the write headers method, the default 200 should be
+			// the response status code
+			expectedStatus := responseStatus
+			if tt.SkipWriteHeaders {
+				expectedStatus = http.StatusOK
+			}
+			if actualStatus := rec.Result().StatusCode; expectedStatus != actualStatus {
+				t.Fatalf("got unexpected status code value, expected != actual: %q != %q", expectedStatus, actualStatus)
+			}
+
+			// Test the response body was left intact
+			if responseBody != rec.Body.String() {
+				t.Fatalf("got unexpected body, expected != actual: %q != %q", responseBody, rec.Body.String())
 			}
 		})
 	}
