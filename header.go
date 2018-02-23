@@ -118,7 +118,7 @@ func headerParams(s string) (http.Header, string) {
 	}), key
 }
 
-var reNumber = regexp.MustCompile(`\d+`)
+var reNumber = regexp.MustCompile(`^\d+\.?\d*$`)
 
 // headerEncodeParam encodes a key/value pair as a proper `key=value`
 // syntax, using double-quotes if necessary.
