@@ -25,8 +25,12 @@ type MiddlewareOpts struct {
 // For examples, see the README.
 func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Create the Server-Timing headers struct
-		var h Header
+		var (
+			// Create the Server-Timing headers struct
+			h Header
+			// Remember if the timing header were added to the response headers
+			headerWritten bool
+		)
 
 		// This places the *Header value into the request context. This
 		// can be extracted again with FromContext.
@@ -46,6 +50,9 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 					// Write the headers
 					writeHeader(headers, &h)
 
+					// Remember that headers were written
+					headerWritten = true
+
 					// Call the original WriteHeader function
 					original(code)
 				}
@@ -54,6 +61,11 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 
 		w = httpsnoop.Wrap(w, hooks)
 		next.ServeHTTP(w, r)
+
+		// In case that next did not called WriteHeader function, add timing header to the response headers
+		if !headerWritten {
+			writeHeader(headers, &h)
+		}
 	})
 }
 
