@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -59,11 +58,8 @@ func ParseHeader(input string) (*Header, error) {
 		// is what modern browsers are treating it as. If the parsing of
 		// an integer fails, the set value remains in the Extra field.
 		if v, ok := m.Extra[paramNameDur]; ok {
-			intv, err := strconv.Atoi(v)
-			if err == nil {
-				m.Duration = time.Duration(intv) * time.Millisecond
-				delete(m.Extra, paramNameDur)
-			}
+			m.Duration, _ = time.ParseDuration(v + "ms")
+			delete(m.Extra, paramNameDur)
 		}
 
 		metrics = append(metrics, &m)
@@ -118,7 +114,7 @@ func headerParams(s string) (http.Header, string) {
 	}), key
 }
 
-var reNumber = regexp.MustCompile(`\d+`)
+var reNumber = regexp.MustCompile(`^\d+\.?\d*$`)
 
 // headerEncodeParam encodes a key/value pair as a proper `key=value`
 // syntax, using double-quotes if necessary.

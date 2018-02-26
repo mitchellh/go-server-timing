@@ -50,6 +50,32 @@ var headerCases = []struct {
 		},
 		`sql-1;desc="MySQL; lookup Server";dur=100`,
 	},
+
+	// Description that contains a number
+	{
+		[]*Metric{
+			{
+				Name:     "sql-1",
+				Duration: 100 * time.Millisecond,
+				Desc:     "GET 200",
+				Extra:    map[string]string{},
+			},
+		},
+		`sql-1;desc="GET 200";dur=100`,
+	},
+
+	// Number that contains floating point
+	{
+		[]*Metric{
+			{
+				Name:     "sql-1",
+				Duration: 100100 * time.Microsecond,
+				Desc:     "MySQL; lookup Server",
+				Extra:    map[string]string{},
+			},
+		},
+		`sql-1;desc="MySQL; lookup Server";dur=100.1`,
+	},
 }
 
 func TestParseHeader(t *testing.T) {
