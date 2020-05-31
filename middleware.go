@@ -47,14 +47,25 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 				// Return a function with same signature as
 				// http.ResponseWriter.WriteHeader to be called in it's place
 				return func(code int) {
-					// Write the headers
+					// Write the headers and remember that headers were written
 					writeHeader(headers, &h)
-
-					// Remember that headers were written
 					headerWritten = true
 
 					// Call the original WriteHeader function
 					original(code)
+				}
+			},
+
+			Write: func(original httpsnoop.WriteFunc) httpsnoop.WriteFunc {
+				return func(b []byte) (int, error) {
+					// If we didn't write headers, then we have to do that
+					// first before any data is written.
+					if !headerWritten {
+						writeHeader(headers, &h)
+						headerWritten = true
+					}
+
+					return original(b)
 				}
 			},
 		}

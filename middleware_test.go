@@ -13,7 +13,6 @@ const (
 )
 
 func TestMiddleware(t *testing.T) {
-
 	cases := []struct {
 		Name             string
 		Metrics          []*Metric
@@ -111,5 +110,51 @@ func TestMiddleware(t *testing.T) {
 				t.Fatalf("got unexpected body, expected != actual: %q != %q", responseBody, rec.Body.String())
 			}
 		})
+	}
+}
+
+// We need to test this separately since the httptest.ResponseRecorder
+// doesn't properly reflect that headers can't be set after writing data,
+// so we have to use a real server.
+func TestMiddleware_writeHeaderNotCalled(t *testing.T) {
+	metrics := []*Metric{
+		{
+			Name:     "sql-1",
+			Duration: 100 * time.Millisecond,
+			Desc:     "MySQL; lookup Server",
+		},
+	}
+
+	// Start our test server
+	ts := httptest.NewServer(Middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set the metrics to the configured case
+		h := FromContext(r.Context())
+		if h == nil {
+			t.Fatal("expected *Header to be present in context")
+		}
+
+		h.Metrics = metrics
+
+		// Write date to response body WITHOUT calling WriteHeader
+		w.Write([]byte(responseBody))
+	}), nil))
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test that it is present or not
+	_, present := map[string][]string(res.Header)[HeaderKey]
+	if !present {
+		t.Fatal("expected header to be present")
+	}
+
+	// Test the response headers
+	expected := (&Header{Metrics: metrics}).String()
+	actual := res.Header.Get(HeaderKey)
+	if actual != expected {
+		t.Fatalf("got wrong value, expected != actual: %q != %q", expected, actual)
 	}
 }
