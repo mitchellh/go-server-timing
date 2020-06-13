@@ -29,10 +29,8 @@ Browser support is required to **view** server timings easily. Because server
 timings are sent as an HTTP header, there is no negative impact to sending
 the header to unsupported browsers.
 
-  * **Chrome 65 or higher** is required to properly display server timings
-    in the devtools.
-
-  * **Firefox is pending** with an [open bug report (ID 1403051)](https://bugzilla.mozilla.org/show_bug.cgi?id=1403051)
+  * Either **Chrome 65 or higher** or **Firefox 71 or higher** is required
+    to properly display server timings in the devtools.
 
   * IE, Opera, and others are unknown at this time.
 
