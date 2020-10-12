@@ -15,6 +15,7 @@ const (
 func TestMiddleware(t *testing.T) {
 	cases := []struct {
 		Name             string
+		Opts             *MiddlewareOpts
 		Metrics          []*Metric
 		SkipWriteHeaders bool
 		Expected         bool
@@ -28,6 +29,19 @@ func TestMiddleware(t *testing.T) {
 		{
 			Name:     "empty metrics",
 			Metrics:  []*Metric{},
+			Expected: false,
+		},
+
+		{
+			Name: "single metric disable headers option",
+			Opts: &MiddlewareOpts{DisableHeaders: true},
+			Metrics: []*Metric{
+				{
+					Name:     "sql-1",
+					Duration: 100 * time.Millisecond,
+					Desc:     "MySQL; lookup Server",
+				},
+			},
 			Expected: false,
 		},
 
@@ -80,7 +94,7 @@ func TestMiddleware(t *testing.T) {
 			})
 
 			// Perform the request
-			Middleware(handler, nil).ServeHTTP(rec, r)
+			Middleware(handler, tt.Opts).ServeHTTP(rec, r)
 
 			// Test that it is present or not
 			_, present := map[string][]string(rec.Header())[HeaderKey]
@@ -90,6 +104,9 @@ func TestMiddleware(t *testing.T) {
 
 			// Test the response headers
 			expected := (&Header{Metrics: tt.Metrics}).String()
+			if tt.Opts != nil && tt.Opts.DisableHeaders == true {
+				expected = ""
+			}
 			actual := rec.Header().Get(HeaderKey)
 			if actual != expected {
 				t.Fatalf("got wrong value, expected != actual: %q != %q", expected, actual)

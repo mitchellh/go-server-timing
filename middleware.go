@@ -8,7 +8,9 @@ import (
 
 // MiddlewareOpts are options for the Middleware.
 type MiddlewareOpts struct {
-	// Nothing currently, reserved for the future.
+	// Don’t write headers in the request. Metrics are still gathered though.
+	DisableHeaders bool
+	// Maybe more in the future.
 }
 
 // Middleware wraps an http.Handler and provides a *Header in the request
@@ -23,7 +25,7 @@ type MiddlewareOpts struct {
 // To control when Server-Timing is sent, the easiest approach is to wrap
 // this middleware and only call it if the request should send server timings.
 // For examples, see the README.
-func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
+func Middleware(next http.Handler, opts *MiddlewareOpts) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
 			// Create the Server-Timing headers struct
@@ -48,7 +50,7 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 				// http.ResponseWriter.WriteHeader to be called in it's place
 				return func(code int) {
 					// Write the headers and remember that headers were written
-					writeHeader(headers, &h)
+					writeHeader(headers, &h, opts)
 					headerWritten = true
 
 					// Call the original WriteHeader function
@@ -61,7 +63,7 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 					// If we didn't write headers, then we have to do that
 					// first before any data is written.
 					if !headerWritten {
-						writeHeader(headers, &h)
+						writeHeader(headers, &h, opts)
 						headerWritten = true
 					}
 
@@ -75,19 +77,20 @@ func Middleware(next http.Handler, _ *MiddlewareOpts) http.Handler {
 
 		// In case that next did not called WriteHeader function, add timing header to the response headers
 		if !headerWritten {
-			writeHeader(headers, &h)
+			writeHeader(headers, &h, opts)
 		}
 	})
 }
 
-func writeHeader(headers http.Header, h *Header) {
+func writeHeader(headers http.Header, h *Header, opts *MiddlewareOpts) {
 	// Grab the lock just in case there is any ongoing concurrency that
 	// still has a reference and may be modifying the value.
 	h.Lock()
 	defer h.Unlock()
 
-	// If there are no metrics set, do nothing
-	if len(h.Metrics) == 0 {
+	// If there are no metrics set, or if the user opted-out writing headers,
+	// do nothing
+	if (opts != nil && opts.DisableHeaders) || len(h.Metrics) == 0 {
 		return
 	}
 
