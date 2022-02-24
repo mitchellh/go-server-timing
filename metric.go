@@ -103,7 +103,7 @@ func (m *Metric) String() string {
 	if _, ok := m.Extra[paramNameDur]; !ok && m.Duration > 0 {
 		parts = append(parts, headerEncodeParam(
 			paramNameDur,
-			strconv.FormatFloat(float64(m.Duration)/float64(time.Millisecond), 'f', -1, 64),
+			strconv.FormatFloat(float64(m.Duration)/float64(time.Millisecond), 'f', 1, 64),
 		))
 	}
 

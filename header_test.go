@@ -22,7 +22,7 @@ var headerCases = []struct {
 				Extra:    map[string]string{},
 			},
 		},
-		`sql-1;desc="MySQL lookup Server";dur=100`,
+		`sql-1;desc="MySQL lookup Server";dur=100.0`,
 	},
 
 	// Comma in description
@@ -35,7 +35,7 @@ var headerCases = []struct {
 				Extra:    map[string]string{},
 			},
 		},
-		`sql-1;desc="MySQL, lookup Server";dur=100`,
+		`sql-1;desc="MySQL, lookup Server";dur=100.0`,
 	},
 
 	// Semicolon in description
@@ -48,7 +48,7 @@ var headerCases = []struct {
 				Extra:    map[string]string{},
 			},
 		},
-		`sql-1;desc="MySQL; lookup Server";dur=100`,
+		`sql-1;desc="MySQL; lookup Server";dur=100.0`,
 	},
 
 	// Description that contains a number
@@ -61,7 +61,7 @@ var headerCases = []struct {
 				Extra:    map[string]string{},
 			},
 		},
-		`sql-1;desc="GET 200";dur=100`,
+		`sql-1;desc="GET 200";dur=100.0`,
 	},
 
 	// Number that contains floating point
