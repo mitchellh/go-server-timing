@@ -81,7 +81,7 @@ func (m *Metric) Start() *Metric {
 func (m *Metric) Stop() *Metric {
 	// Only record if we have a start time set with Start()
 	if !m.startTime.IsZero() {
-		m.Duration = time.Since(m.startTime)
+		m.Duration += time.Since(m.startTime)
 	}
 
 	return m

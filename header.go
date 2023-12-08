@@ -70,6 +70,12 @@ func ParseHeader(input string) (*Header, error) {
 
 // NewMetric creates a new Metric and adds it to this header.
 func (h *Header) NewMetric(name string) *Metric {
+	for i := range h.Metrics {
+		if h.Metrics[i].Name == name {
+			return h.Metrics[i]
+		}
+	}
+
 	return h.Add(&Metric{Name: name})
 }
 
